@@ -9,7 +9,6 @@ int average = 0;
 static float value = 0;
 bool state = false; // true = on, false = off
 bool runEnd = false; // check to see if code already ran
-int time = 0;
 int threshold = 0;
 int timeDelay = 100;
 
@@ -39,34 +38,35 @@ void loop() {
   Serial.println(average);
   delay(timeDelay);
 
-  if (!state) { // if off state
-    if (average < ambientLight - 50) {
-      Serial.println("START");
-      time = 0;
-      threshold = average + 100; // sets threshold to stop motor
-      state = true;
-      timeDelay = 100;
-      digitalWrite(7,HIGH); // turns on motor
+  if (!runEnd) {
+    if (!state) { // if off state
+      if (average < ambientLight - 50) {
+        Serial.println("START");
+        float initial = analogRead(A0);
+        threshold = initial + 20; // sets threshold to stop motor
+        state = true;
+        timeDelay = 100;
+        digitalWrite(7,HIGH); // turns on motor
 
-      Serial.print("THRESHOLD: ");
-      Serial.println(threshold);
-    }
-  } else { // if on state
-    if (average >= threshold) {       
-    	//digitalWrite(11, HIGH);  
-    	digitalWrite(7,LOW);       // stop motor
-      Serial.println("STOP");
-      // Serial.println(time);
-      state = false;
-      timeDelay = 1000;
-    }
-    else {
-      time = time + 100;
-      //digitalWrite(11, HIGH);
-    	digitalWrite(7,HIGH);  
+        Serial.print("THRESHOLD: ");
+        Serial.println(threshold);
+      }
+    } else { // if on state
+      if (average >= threshold) {       
+        //digitalWrite(11, HIGH);  
+        digitalWrite(7,LOW);       // stop motor
+        Serial.println("STOP");
+
+        // stop system
+        runEnd = true;
+        state = false;
+        timeDelay = 1000;
+      }
+      else {
+        digitalWrite(7,HIGH);
+      }
     }
   }
-  
 }
 
 void buttonPress() {
