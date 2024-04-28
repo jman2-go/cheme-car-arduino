@@ -1,10 +1,10 @@
-#define BUTTON_PIN 4
+#define BUTTON_PIN 3
 
 int LDRvalue = 0;          // initiate photoresistor value
 int motorValue = 0;
 const int readings = 20; 
 int ambientLight = 0;
-int total = 0;
+int t = 0;
 int average = 0;
 static float value = 0;
 bool state = false; // true = on, false = off
@@ -40,10 +40,9 @@ void loop() {
 
   if (!runEnd) {
     if (!state) { // if off state
-      if (average < ambientLight - 50) {
+      if (average < ambientLight - 30) {
         Serial.println("START");
-        float initial = analogRead(A0);
-        threshold = initial + 20; // sets threshold to stop motor
+        threshold = average + 50; // sets threshold to stop motor
         state = true;
         timeDelay = 100;
         digitalWrite(7,HIGH); // turns on motor
@@ -52,7 +51,7 @@ void loop() {
         Serial.println(threshold);
       }
     } else { // if on state
-      if (average >= threshold) {       
+      if ((average >= threshold) and (t > 10)){       
         //digitalWrite(11, HIGH);  
         digitalWrite(7,LOW);       // stop motor
         Serial.println("STOP");
@@ -64,6 +63,7 @@ void loop() {
       }
       else {
         digitalWrite(7,HIGH);
+        t++;
       }
     }
   }
@@ -90,6 +90,7 @@ void buttonPress() {
   // resets code
   state = false;
   runEnd = false;
+  t = 0;
   timeDelay = 500;
 
   Serial.println("RESET!");
